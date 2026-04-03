@@ -8,6 +8,7 @@
   --urlbar-min-height: 30px !important;
   --urlbarView-item-inline-padding: calc(1px + var(--uc-urlbar-inline-padding) + var(--uc-urlbar-icon-inline-padding)) !important;
   --urlbar-icon-border-radius: 99px !important;
+  --urlbar-inner-border-radius: 99px !important;
   --urlbar-icon-padding: calc(var(--toolbarbutton-inner-padding) - 2px) !important;
   --urlbar-margin-inline: 6px !important;
   --identity-box-margin-inline: 6px !important;
@@ -38,7 +39,7 @@
 /*
   MARK: URL bar
 */
-#urlbar-background,
+.urlbar-background,
 #searchbar {
   border-radius: calc(var(--urlbar-icon-border-radius) + 2px) !important;
 
@@ -61,7 +62,7 @@
 }
 
 /* Add padding to sides of URL bar. */
-:is(#urlbar-input-container, .urlbar-input-container),
+:is(.urlbar-input-container, .urlbar-input-container),
 #searchbar {
   padding-inline: var(--uc-urlbar-inline-padding) !important;
 }
@@ -195,7 +196,7 @@
 }
 
 /* Focus border for URL bar. */
-#urlbar[focused="true"]:not([suppress-focus-border]) > #urlbar-background,
+#urlbar[focused]:not([suppress-focus-border]) > .urlbar-background,
 #searchbar:focus-within {
   outline-offset: calc(var(--focus-outline-width) * -1 + 1px) !important;
 }
