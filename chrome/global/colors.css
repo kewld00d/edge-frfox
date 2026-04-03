@@ -90,6 +90,8 @@
   --sidebar-text-color: light-dark(#000, #fff) !important;
   --sidebar-border-color: light-dark(#bfbfbf, #686868) !important;
 
+  --inactive-titlebar-opacity: 1 !important;
+
   /* ::::: Dialog theme ::::: */
   & #window-modal-dialog::backdrop {
     /* Overlay when dialog is shown. */

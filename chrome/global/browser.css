@@ -141,6 +141,10 @@
     }
   }
 
+  .browserContainer {
+    background-color: transparent !important;
+  }
+
   /*
     MARK: Rc Devtools
   */
