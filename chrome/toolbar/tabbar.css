@@ -37,7 +37,14 @@
     --tab-shadow-max-size: 0 !important;
     --uc-tab-separator-height: 20px;
     --uc-toolbarbutton-block-margin: 2px;
-    --uc-tab-group-label-padding: 6px;
+
+    --uc-tab-group-label-border-radius: 4px;
+    --tab-group-label-padding: 6px !important;
+    --uc-tab-group-label-margin: 6px;
+
+    --tab-group-line-thickness: 2px !important;
+    --tab-group-line-toolbar-border-distance: 2px !important;
+    --tab-overflow-clip-margin: 0px !important;
 
     /* Gap between tab and adjacent buttons (+2px button margin). */
     --uc-toolbarbutton-tab-gap: 2px;
@@ -303,13 +310,20 @@
 /* Tab container indicator. */
 .tabbrowser-tab[usercontextid] {
   & .tab-context-line {
+    position: absolute !important;
+    inset-block: auto 0 !important;
+    inset-inline: 0 !important;
     height: 2px !important;
-    border-radius: 2px !important;
-    margin: 2px 7px 0 !important;
+    margin-inline: 4px !important;
+
+    border-top-left-radius: 2px !important;
+    border-top-right-radius: 2px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
   }
 
   &[selected] .tab-context-line {
-    margin-inline: 9px !important;
+    inset-inline: 0 !important;
   }
 }
 
@@ -471,8 +485,73 @@
 
 .tab-group-label-container {
   #tabbrowser-tabs[orient="horizontal"] & {
-    margin-inline-start: var(--uc-tab-group-label-padding) !important;
-    padding-inline-end: var(--uc-tab-group-label-padding) !important;
+    margin-inline-start: var(--uc-tab-group-label-margin) !important;
+    padding-inline-end: var(--uc-tab-group-label-margin) !important;
+  }
+}
+
+.tab-group-label {
+  font-weight: 400 !important;
+  border-radius: var(--uc-tab-group-label-border-radius) !important;
+  color: light-dark(var(--tab-group-color-pale), var(--tab-group-label-text-dark)) !important;
+  background-color: light-dark(var(--tab-group-color), var(--tab-group-color-invert)) !important;
+  outline: none !important;
+}
+
+.tabbrowser-tab[selected][fadein]:not([pinned]) {
+  z-index: 1 !important;
+}
+
+.tab-group-line {
+  #tabbrowser-tabs[orient="horizontal"] & {
+    height: var(--tab-group-line-thickness);
+    inset-inline: calc(-1 * var(--tab-overflow-clip-margin));
+    inset-block-start: var(--tab-group-line-toolbar-border-distance) !important;
+
+    tab-group:not([collapsed]) > .tabbrowser-tab:last-of-type > .tab-stack > .tab-background > &,
+    tab-group[collapsed]:not([hasmultipletabs]) & {
+      inset-inline-end: calc(var(--tab-border-radius) / 2);
+      border-start-end-radius: calc(var(--tab-group-line-thickness) / 2);
+      border-end-end-radius: calc(var(--tab-group-line-thickness) / 2);
+    }
+
+    /* Selected tab */
+    tab-group > .tabbrowser-tab[selected] > .tab-stack > .tab-background > & {
+      inset-inline: var(--tab-border-radius) !important;
+      border-radius: calc(var(--tab-group-line-thickness) / 2) !important;
+    }
+
+    /* Before selected tab */
+    tab-group:not([collapsed]) > .tabbrowser-tab:has(+ [selected]) & {
+      inset-inline-end: calc(var(--tab-border-radius) * -1) !important;
+    }
+
+    /* After selected tab */
+    tab-group:not([collapsed]) > .tabbrowser-tab[selected] + .tabbrowser-tab & {
+      inset-inline-start: calc(var(--tab-border-radius) * -1) !important;
+    }
+  }
+}
+
+.tab-group-label-container {
+  #tabbrowser-tabs[orient="horizontal"] tab-group:not([collapsed]) > &::after,
+  #tabbrowser-tabs[orient="horizontal"] tab-group[collapsed][hasactivetab]:not([movingtabgroup]) > &::after {
+    inset-block: var(--tab-group-line-toolbar-border-distance) auto !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] tab-group[collapsed][hasactivetab]:not([movingtabgroup]) > &::after,
+  #tabbrowser-tabs[orient="horizontal"] tab-group:not([collapsed]):has(tab[selected]:first-of-type) > &::after {
+    inset-inline-end: calc(var(--tab-border-radius) * -1) !important;
+  }
+}
+
+.tab-group-overflow-count-container {
+  #tabbrowser-tabs[orient="horizontal"] tab-group[hasactivetab][hasmultipletabs] > &::after {
+    inset-block: var(--tab-group-line-toolbar-border-distance) auto !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] tab-group[hasactivetab] > &::after {
+    inset-inline-start: calc(var(--tab-border-radius) * -1) !important;
   }
 }
 
