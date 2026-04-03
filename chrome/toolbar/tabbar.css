@@ -37,6 +37,7 @@
     --tab-shadow-max-size: 0 !important;
     --uc-tab-separator-height: 20px;
     --uc-toolbarbutton-block-margin: 2px;
+    --uc-tab-group-label-padding: 6px;
 
     /* Gap between tab and adjacent buttons (+2px button margin). */
     --uc-toolbarbutton-tab-gap: 2px;
@@ -133,25 +134,26 @@
 }
 
 #tabbrowser-tabs {
-  /* Remove the border from the left of the tab bar. */
-  border-inline: none !important;
-  padding-inline-start: var(--tab-overflow-pinned-tabs-width) !important;
-
-  /* Add space above the tabs. */
-  margin-top: var(--uc-tab-top-margin) !important;
-
-  /* Pull tabs closer to toolbar buttons when overflowed. */
-  &[overflow]:not([haspinnedtabs]) {
-    margin-inline-start: -2px !important;
-  }
-
-  /* Remove gap between pinned and unpinned tabs. */
-  &[haspinnedtabs]:not([positionpinnedtabs]) .tabbrowser-tab:nth-child(1 of :not([pinned], [hidden])) {
-    margin-inline-start: 0 !important;
-  }
-
   &[orient="horizontal"] {
+    --tab-max-width: 240px !important;
     --tabstrip-min-height: auto !important;
+
+    /* Remove the border from the left of the tab bar. */
+    border-inline: none !important;
+    padding-inline-start: var(--tab-overflow-pinned-tabs-width) !important;
+
+    /* Add space above the tabs. */
+    margin-top: var(--uc-tab-top-margin) !important;
+
+    /* Pull tabs closer to toolbar buttons when overflowed. */
+    &[overflow]:not([haspinnedtabs]) {
+      margin-inline-start: -2px !important;
+    }
+
+    /* Remove gap between pinned and unpinned tabs. */
+    &[haspinnedtabs]:not([positionpinnedtabs]) .tabbrowser-tab:nth-child(1 of :not([pinned], [hidden])) {
+      margin-inline-start: 0 !important;
+    }
   }
 }
 
@@ -225,13 +227,7 @@
 .tabbrowser-tab {
   font-size: 12px !important;
   padding-inline: 0 !important;
-  /* Allow shadows to appear outside the tabs. */
-  overflow-clip-margin: 8px !important;
-
-  /* Set width of tabs. */
-  &:not([pinned], [style*="max-width"])[fadein] {
-    max-width: 240px !important;
-  }
+  
 
   /* Enforce tab foreground colour. */
   &:is([visuallyselected], [multiselected]) {
@@ -241,6 +237,11 @@
       color: var(--tab-selected-textcolor-inactive, var(--tab-selected-textcolor)) !important;
     }
   }
+}
+
+:not(tab-group[collapsed]) > .tabbrowser-tab {
+  /* Allow shadows to appear outside the tabs. */
+  overflow-clip-margin: 8px !important;
 }
 
 /* Tab inner content padding. */
@@ -463,6 +464,19 @@
 }
 /* #endregion */
 
+/*
+  MARK: Tab groups
+*/
+/* #region */
+
+.tab-group-label-container {
+  #tabbrowser-tabs[orient="horizontal"] & {
+    margin-inline-start: var(--uc-tab-group-label-padding) !important;
+    padding-inline-end: var(--uc-tab-group-label-padding) !important;
+  }
+}
+
+/* #endregion */
 
 /*
   MARK: Tab separators
@@ -501,14 +515,41 @@
   }
 }
 
-/* Set separator color and add separator for last visible tab. */
 .tabbrowser-tab:not([selected], [multiselected], :hover) {
-  /* All tabs. */
-  & .tab-stack::before,
-  /* Last visible tab. */
-  &:nth-last-child(1 of .tabbrowser-tab:not([hidden])) .tab-stack::after,
-  /* Last visible pinned tab when overflowed. */
-  #tabbrowser-tabs[overflow] &:nth-last-child(1 of .tabbrowser-tab[pinned]:not([hidden])) .tab-stack::after {
+  /* Set separator color and add separator for last visible tab. */
+  :not(tab-group) > & {
+    /* All tabs. */
+    & .tab-stack::before,
+    /* Last visible tab. */
+    &:nth-last-child(1 of .tabbrowser-tab:not([hidden])) .tab-stack::after,
+    /* Last visible tab before tab-group. */
+    &:has(~ .tabbrowser-tab[hidden] + tab-group) .tab-stack::after,
+    &:has(+ tab-group) .tab-stack::after,
+    /* Last visible pinned tab when overflowed. */
+    #tabbrowser-tabs[overflow] &:nth-last-child(1 of .tabbrowser-tab[pinned]:not([hidden])) .tab-stack::after {
+      border-color: color-mix(in srgb, currentColor 34%, transparent);
+    }
+  }
+
+  /* Add separators to grouped-tabs. */
+  tab-group > & {
+    /* All tabs. */
+    & .tab-stack::before {
+      border-color: color-mix(in srgb, currentColor 34%, transparent);
+    }
+  }
+
+  /* Add separator for last tab if in tab-group. */
+  tab-group:nth-last-child(1 of :is(tab-group, .tabbrowser-tab)) > & {
+    /* Last visible tab. */
+    &:nth-last-child(1 of .tabbrowser-tab:not([hidden])) .tab-stack::after {
+      border-color: color-mix(in srgb, currentColor 34%, transparent);
+    }
+  }
+
+  /* Last visible tab of tab-group before other tab-group. */
+  tab-group:has(~ .tabbrowser-tab[hidden] + tab-group) > &:last-of-type .tab-stack::after,
+  tab-group:has(~ tab-group) > &:last-of-type .tab-stack::after {
     border-color: color-mix(in srgb, currentColor 34%, transparent);
   }
 }
@@ -521,6 +562,7 @@
  */
 .tabbrowser-tab:is([selected], [multiselected], :hover):not([hidden]) {
   & + .tabbrowser-tab .tab-stack::before,
+  tab-group:has(&:last-of-type) + .tabbrowser-tab .tab-stack::before,
   & + .tabbrowser-tab[hidden] ~ .tabbrowser-tab:not([hidden]):is([hidden] + *) .tab-stack::before {
     border-color: transparent !important;
   }
@@ -613,7 +655,11 @@
     margin-inline-start: -8px !important;
     margin-inline-end: calc(-1 * var(--tab-border-radius)) !important;
 
-    :where(#tabbrowser-arrowscrollbox .tabbrowser-tab:nth-child(1 of .tabbrowser-tab:not([hidden]))) {
+    :where(#tabbrowser-arrowscrollbox > :nth-child(1 of .tabbrowser-tab:not([hidden])):not(tab-group + *)) {
+      margin-inline-start: 8px !important;
+    }
+
+    #tabbrowser-arrowscrollbox > tab-group:nth-child(1 of :is(.tabbrowser-tab:not([hidden]), tab-group)) > .tab-group-label-container {
       margin-inline-start: 8px !important;
     }
   }
